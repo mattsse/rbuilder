@@ -1,6 +1,7 @@
 use crate::telemetry::{inc_provider_bad_reopen_counter, inc_provider_reopen_counter};
 use alloy_eips::{BlockNumHash, BlockNumberOrTag};
 use alloy_primitives::{BlockHash, BlockNumber};
+use parking_lot::{Mutex, RwLock};
 use reth::providers::{BlockHashReader, ChainSpecProvider, ProviderFactory};
 use reth_chainspec::ChainInfo;
 use reth_db::{Database, DatabaseError};
@@ -13,12 +14,7 @@ use reth_provider::{
     HeaderProvider, StateProviderBox, StateProviderFactory, StaticFileProviderFactory,
 };
 use revm_primitives::{B256, U256};
-use std::{
-    ops::RangeBounds,
-    path::PathBuf,
-    sync::{Arc},
-};
-use parking_lot::{RwLock, Mutex};
+use std::{ops::RangeBounds, path::PathBuf, sync::Arc};
 use tracing::debug;
 
 /// This struct is used as a workaround for https://github.com/paradigmxyz/reth/issues/7836
@@ -72,7 +68,7 @@ impl<N: NodeTypesWithDB + ProviderNodeTypes + Clone> ProviderFactoryReopener<N> 
     /// This will currently available provider factory without verifying if its correct, it can be used
     /// when consistency is not absolutely required
     pub fn provider_factory_unchecked(&self) -> ProviderFactory<N> {
-        self.provider_factory.lock().unwrap().clone()
+        self.provider_factory.lock().clone()
     }
 
     /// This will check if historical block hashes for the given block is correct and if not it will reopen
@@ -86,13 +82,10 @@ impl<N: NodeTypesWithDB + ProviderNodeTypes + Clone> ProviderFactoryReopener<N> 
             .provider_factory_unchecked()
             .last_block_number()
             .map_err(|err| eyre::eyre!("Error getting best block number: {:?}", err))?;
-        let mut provider_factory = self.provider_factory.lock().unwrap();
+        let mut provider_factory = self.provider_factory.lock();
 
         // Don't need to check consistency for the block that was just checked.
-        let last_consistent_block_guard = self.last_consistent_block.read().unwrap();
-        let last_consistent_block = *last_consistent_block_guard;
-        // Drop before write might be attempted to avoid deadlock!
-        drop(last_consistent_block_guard);
+        let last_consistent_block = *self.last_consistent_block.read();
         if !self.testing_mode && last_consistent_block != Some(best_block_number) {
             match check_provider_factory_health(best_block_number, &provider_factory) {
                 Ok(()) => {}
@@ -121,8 +114,7 @@ impl<N: NodeTypesWithDB + ProviderNodeTypes + Clone> ProviderFactoryReopener<N> 
                 }
             }
 
-            let mut last_consistent_block = self.last_consistent_block.write().unwrap();
-            *last_consistent_block = Some(best_block_number);
+            *self.last_consistent_block.write() = Some(best_block_number);
         }
         Ok(provider_factory.clone())
     }

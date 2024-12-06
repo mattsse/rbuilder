@@ -1,9 +1,9 @@
-use std::sync::{Arc};
+use crate::live_builder::block_output::relay_submit::BlockBuildingSink;
+use parking_lot::Mutex;
+use std::sync::Arc;
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 use tracing::error;
-use parking_lot::Mutex;
-use crate::live_builder::block_output::relay_submit::BlockBuildingSink;
 
 use super::interfaces::{Bid, BidMaker};
 

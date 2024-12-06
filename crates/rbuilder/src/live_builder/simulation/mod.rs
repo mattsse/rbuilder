@@ -11,10 +11,10 @@ use crate::{
     utils::gen_uid,
 };
 use ahash::HashMap;
+use parking_lot::Mutex;
 use reth_provider::StateProviderFactory;
 use simulation_job::SimulationJob;
-use std::sync::{Arc};
-use parking_lot::Mutex;
+use std::sync::Arc;
 use tokio::{sync::mpsc, task::JoinHandle};
 use tokio_util::sync::CancellationToken;
 use tracing::{info_span, Instrument};
@@ -119,7 +119,7 @@ where
                 let (sim_req_sender, sim_req_receiver) = flume::unbounded();
                 let (sim_results_sender, sim_results_receiver) = mpsc::channel(1024);
                 {
-                    let mut contexts = current_contexts.lock().unwrap();
+                    let mut contexts = current_contexts.lock();
                     let sim_context = SimulationContext {
                         block_ctx: ctx,
                         requests: sim_req_receiver,
@@ -140,7 +140,7 @@ where
 
                 // clean up
                 {
-                    let mut contexts = current_contexts.lock().unwrap();
+                    let mut contexts = current_contexts.lock();
                     contexts.contexts.remove(&block_context);
                 }
             }
@@ -148,7 +148,7 @@ where
         );
 
         {
-            let mut tasks = self.running_tasks.lock().unwrap();
+            let mut tasks = self.running_tasks.lock();
             tasks.retain(|handle| !handle.is_finished());
             tasks.push(handle);
         }

@@ -17,10 +17,10 @@ use crate::{
 use ahash::HashMap;
 use alloy_primitives::{utils::format_ether, U256};
 use mockall::automock;
+use parking_lot::Mutex;
 use reth_chainspec::ChainSpec;
 use reth_primitives::SealedBlock;
-use std::sync::{Arc};
-use parking_lot::Mutex;
+use std::sync::Arc;
 use tokio::{sync::Notify, time::Instant};
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, event, info_span, trace, warn, Instrument, Level};
@@ -44,7 +44,7 @@ pub struct BestBlockCell {
 
 impl BestBlockCell {
     pub fn compare_and_update(&self, block: Block) {
-        let mut best_block = self.block.lock().unwrap();
+        let mut best_block = self.block.lock();
         let old_value = best_block
             .as_ref()
             .map(|b| b.trace.bid_value)
@@ -56,7 +56,7 @@ impl BestBlockCell {
     }
 
     pub fn take_best_block(&self) -> Option<Block> {
-        self.block.lock().unwrap().take()
+        self.block.lock().take()
     }
 
     pub async fn wait_for_change(&self) {
