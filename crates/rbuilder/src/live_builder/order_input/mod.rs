@@ -18,9 +18,10 @@ use reth_provider::StateProviderFactory;
 use std::{
     net::Ipv4Addr,
     path::PathBuf,
-    sync::{Arc, Mutex},
+    sync::{Arc},
     time::Duration,
 };
+use parking_lot::Mutex;
 use tokio::{sync::mpsc, task::JoinHandle};
 use tokio_util::sync::CancellationToken;
 use tracing::{info, trace, warn};

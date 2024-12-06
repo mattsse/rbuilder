@@ -1,6 +1,7 @@
 use super::interfaces::{BidValueObs, BidValueSource};
 use alloy_primitives::U256;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc};
+use parking_lot::Mutex;
 
 /// Simple struct tracking the last best bid and asking it in a sync way via best_bid_value.
 pub struct BestBidSyncSource {

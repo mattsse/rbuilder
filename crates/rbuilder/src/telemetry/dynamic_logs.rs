@@ -4,8 +4,9 @@ use lazy_static::lazy_static;
 use std::{
     fs::File,
     path::PathBuf,
-    sync::{Arc, Mutex},
+    sync::{Arc},
 };
+use parking_lot::Mutex;
 use tracing_subscriber::{
     filter::Filtered, fmt, layer::SubscriberExt, reload, reload::Handle, util::SubscriberInitExt,
     EnvFilter, Layer, Registry,

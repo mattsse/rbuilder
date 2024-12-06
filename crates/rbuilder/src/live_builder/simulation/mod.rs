@@ -13,7 +13,8 @@ use crate::{
 use ahash::HashMap;
 use reth_provider::StateProviderFactory;
 use simulation_job::SimulationJob;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc};
+use parking_lot::Mutex;
 use tokio::{sync::mpsc, task::JoinHandle};
 use tokio_util::sync::CancellationToken;
 use tracing::{info_span, Instrument};

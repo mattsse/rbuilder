@@ -8,9 +8,10 @@ use futures::StreamExt;
 use reth_provider::StateProviderFactory;
 use std::{
     pin::pin,
-    sync::{Arc, Mutex},
+    sync::{Arc},
     time::Instant,
 };
+use parking_lot::Mutex;
 use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, error, info};

@@ -7,9 +7,10 @@ use lazy_static::lazy_static;
 use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, Executor, SqliteConnection};
 use std::{
     path::Path,
-    sync::{Arc, Mutex},
+    sync::{Arc},
     time::Duration,
 };
+use parking_lot::Mutex;
 use tokio_util::sync::CancellationToken;
 use tracing::{error, info_span, warn};
 

@@ -1,8 +1,8 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc};
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 use tracing::error;
-
+use parking_lot::Mutex;
 use crate::live_builder::block_output::relay_submit::BlockBuildingSink;
 
 use super::interfaces::{Bid, BidMaker};
@@ -41,14 +41,12 @@ impl PendingBid {
     }
     /// Updates bid, replacing  on current (we assume they are always increasing but we don't check it).
     fn update(&self, bid: Bid) {
-        let mut current_bid = self.bid.lock().unwrap();
-        *current_bid = Some(bid);
+        *self.bid.lock() = Some(bid);
         self.bid_notify.notify_one();
     }
 
     fn consume_bid(&self) -> Option<Bid> {
-        let mut current_bid = self.bid.lock().unwrap();
-        current_bid.take()
+        self.bid.lock().take()
     }
 }
 

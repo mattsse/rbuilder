@@ -10,10 +10,11 @@ use crate::{
 use reth::revm::cached::CachedReads;
 use reth_provider::StateProviderFactory;
 use std::{
-    sync::{Arc, Mutex},
+    sync::{Arc},
     thread::sleep,
     time::{Duration, Instant},
 };
+use parking_lot::Mutex;
 use tokio_util::sync::CancellationToken;
 use tracing::error;
 
